@@ -16,5 +16,7 @@ Obviously, it's also removed from the original document.
 
 The refactoring is offered only for classes matching the following requirements:
 
- - a class is not private
- - a class does not match the current filename
+ - class is not private
+ - class name does not match the current filename
+
+![alt tag](http://i.imgur.com/YQnu1rX.png)
