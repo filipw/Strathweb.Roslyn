@@ -21,9 +21,12 @@ namespace MoveClassToFile
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
             var node = root.FindNode(context.Span);
 
-            // Only for a type declaration node that doesn't match the current file name
+            // only for a type declaration node that doesn't match the current file name
+            // also omit all private classes
             var typeDecl = node as TypeDeclarationSyntax;
-            if (typeDecl == null || context.Document.Name.ToLowerInvariant() == string.Format("{0}.cs",typeDecl.Identifier.ToString().ToLowerInvariant()))
+            if (typeDecl == null ||
+                context.Document.Name.ToLowerInvariant() == string.Format("{0}.cs", typeDecl.Identifier.ToString().ToLowerInvariant()) ||
+                typeDecl.Modifiers.Any(SyntaxKind.PrivateKeyword))
             {
                 return;
             }
@@ -40,16 +43,16 @@ namespace MoveClassToFile
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
             var typeSymbol = semanticModel.GetDeclaredSymbol(typeDecl, cancellationToken);
 
-            //remove type from current files
+            // remove type from current files
             var currentSyntaxTree = await document.GetSyntaxTreeAsync();
             var currentRoot = await currentSyntaxTree.GetRootAsync();
             var replacedRoot = currentRoot.RemoveNode(typeDecl, SyntaxRemoveOptions.KeepNoTrivia);
 
             document = document.WithSyntaxRoot(replacedRoot);
 
-            //create new tree for a new file
-            //we drag all the usings because we don't know which are needed
-            //and there is no easy way to find out which
+            // create new tree for a new file
+            // we drag all the usings because we don't know which are needed
+            // and there is no easy way to find out which
             var currentUsings = currentRoot.DescendantNodesAndSelf().Where(s => s is UsingDirectiveSyntax);
 
             var newFileTree = SyntaxFactory.CompilationUnit()
