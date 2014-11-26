@@ -1,6 +1,7 @@
 using System.Composition;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
@@ -39,8 +40,6 @@ namespace MoveClassToFile
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
             var typeSymbol = semanticModel.GetDeclaredSymbol(typeDecl, cancellationToken);
 
-            var @namespace = typeSymbol.ContainingNamespace;
-
             //remove type from current files
             var currentSyntaxTree = await document.GetSyntaxTreeAsync();
             var currentRoot = await currentSyntaxTree.GetRootAsync();
@@ -49,19 +48,23 @@ namespace MoveClassToFile
             document = document.WithSyntaxRoot(replacedRoot);
 
             //create new tree for a new file
-            //we omit the namespaces cause there is no easy way to drag only the correct ones along. or should we take all of them?
+            //we drag all the usings because we don't know which are needed
+            //and there is no easy way to find out which
+            var currentUsings = currentRoot.DescendantNodesAndSelf().Where(s => s is UsingDirectiveSyntax);
+
             var newFileTree = SyntaxFactory.CompilationUnit()
+                .WithUsings(SyntaxFactory.List<UsingDirectiveSyntax>(currentUsings.Select(i => (UsingDirectiveSyntax)i)))
                         .WithMembers(
                             SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
                                 SyntaxFactory.NamespaceDeclaration(
-                                    SyntaxFactory.IdentifierName(@namespace.Name))
+                                    SyntaxFactory.IdentifierName(typeSymbol.ContainingNamespace.ToString()))
                         .WithMembers(
                              SyntaxFactory.SingletonList<MemberDeclarationSyntax>(typeDecl))))
                 .NormalizeWhitespace();
 
             //move to new File
             //TODO: handle name conflicts
-            var newDocument = document.Project.AddDocument(string.Format("{0}.cs", identifierToken.Text), SourceText.From(newFileTree.ToFullString()));
+            var newDocument = document.Project.AddDocument(string.Format("{0}.cs", identifierToken.Text), SourceText.From(newFileTree.ToFullString()), document.Folders);
             return newDocument.Project.Solution;
         }
     }
