@@ -20,3 +20,5 @@ The refactoring is offered only for classes matching the following requirements:
  - class name does not match the current filename
 
 ![alt tag](http://i.imgur.com/YQnu1rX.png)
+
+Install it [from VSIX Gallery](https://visualstudiogallery.msdn.microsoft.com/4151b07d-ed17-4158-960b-0c14eae7c330).
