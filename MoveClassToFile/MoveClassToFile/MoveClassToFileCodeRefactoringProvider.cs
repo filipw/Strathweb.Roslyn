@@ -32,11 +32,11 @@ namespace MoveClassToFile
                 return;
             }
 
-            var action = CodeAction.Create("Move class to file", c => ReverseTypeNameAsync(context.Document, typeDecl, c));
+            var action = CodeAction.Create("Move class to file", c => MoveClassIntoNewFileAsync(context.Document, typeDecl, c));
             context.RegisterRefactoring(action);
         }
 
-        private async Task<Solution> ReverseTypeNameAsync(Document document, TypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
+        private async Task<Solution> MoveClassIntoNewFileAsync(Document document, TypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
         {
             var identifierToken = typeDecl.Identifier;
 
