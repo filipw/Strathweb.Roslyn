@@ -45,8 +45,8 @@ namespace MoveClassToFile
             var typeSymbol = semanticModel.GetDeclaredSymbol(typeDecl, cancellationToken);
 
             // remove type from current files
-            var currentSyntaxTree = await document.GetSyntaxTreeAsync();
-            var currentRoot = await currentSyntaxTree.GetRootAsync();
+            var currentSyntaxTree = await document.GetSyntaxTreeAsync(cancellationToken);
+            var currentRoot = await currentSyntaxTree.GetRootAsync(cancellationToken);
             var replacedRoot = currentRoot.RemoveNode(typeDecl, SyntaxRemoveOptions.KeepNoTrivia);
 
             document = document.WithSyntaxRoot(replacedRoot);
@@ -80,8 +80,8 @@ namespace MoveClassToFile
 
         private static async Task<Document> RemoveUnusedImportDirectivesAsync(Document document, CancellationToken cancellationToken)
         {
-            var root = await document.GetSyntaxRootAsync();
-            var semanticModel = await document.GetSemanticModelAsync();
+            var root = await document.GetSyntaxRootAsync(cancellationToken);
+            var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
 
             root = RemoveUnusedImportDirectives(semanticModel, root, cancellationToken);
             document = document.WithSyntaxRoot(root);
