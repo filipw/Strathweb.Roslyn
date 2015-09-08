@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="MoveClassToFile.Vsix..f0b2cce8-60cc-4b13-9ffe-177a1df5e159" Version="0.2" Language="en-US" Publisher="filipw"/>
+    <Identity Id="MoveClassToFile.Vsix..f0b2cce8-60cc-4b13-9ffe-177a1df5e159" Version="0.3.0" Language="en-US" Publisher="filipw"/>
     <DisplayName>Move Class To File</DisplayName>
     <Description xml:space="preserve">Roslyn refactoring allowing you to extract a class to a separate file.</Description>
     <MoreInfo>https://github.com/filipw/Strathweb.Roslyn</MoreInfo>
