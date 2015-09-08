@@ -24,7 +24,7 @@ namespace MoveClassToFile
 
             // only for a type declaration node that doesn't match the current file name
             // also omit all private classes
-            var typeDecl = node as TypeDeclarationSyntax;
+            var typeDecl = node as BaseTypeDeclarationSyntax;
             if (typeDecl == null ||
                 context.Document.Name.ToLowerInvariant() == string.Format("{0}.cs", typeDecl.Identifier.ToString().ToLowerInvariant()) ||
                 typeDecl.Modifiers.Any(SyntaxKind.PrivateKeyword))
@@ -36,7 +36,7 @@ namespace MoveClassToFile
             context.RegisterRefactoring(action);
         }
 
-        private async Task<Solution> MoveClassIntoNewFileAsync(Document document, TypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
+        private async Task<Solution> MoveClassIntoNewFileAsync(Document document, BaseTypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
         {
             var identifierToken = typeDecl.Identifier;
 
