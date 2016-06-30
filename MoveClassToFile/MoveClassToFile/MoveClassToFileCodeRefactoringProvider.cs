@@ -32,11 +32,32 @@ namespace MoveClassToFile
                 return;
             }
 
-            var action = CodeAction.Create("Move class to file", c => MoveClassIntoNewFileAsync(context.Document, typeDecl, c));
-            context.RegisterRefactoring(action);
+            var classesInFile = root.DescendantNodes().OfType<BaseTypeDeclarationSyntax>().Count();
+            if (classesInFile > 1)
+            {
+                var action = CodeAction.Create("Move class to file", c => MoveClassIntoNewFileAsync(context.Document, typeDecl, c));
+                context.RegisterRefactoring(action);
+            }
+            else if (classesInFile == 1)
+            {
+                var action = CodeAction.Create("Rename file to match type name", c => RenameFileAsync(context.Document, typeDecl, c));
+                context.RegisterRefactoring(action);
+            }
         }
 
-        private async Task<Solution> MoveClassIntoNewFileAsync(Document document, BaseTypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
+        private static async Task<Solution> RenameFileAsync(Document document, BaseTypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
+        {
+            var identifierToken = typeDecl.Identifier;
+            var currentSyntaxTree = await document.GetSyntaxTreeAsync(cancellationToken);
+            var currentRoot = await currentSyntaxTree.GetRootAsync(cancellationToken);
+
+            var project = document.Project.RemoveDocument(document.Id);
+            var newDocument = project.AddDocument($"{identifierToken.Text}.cs", currentRoot, document.Folders);
+
+            return newDocument.Project.Solution;
+        }
+
+        private static async Task<Solution> MoveClassIntoNewFileAsync(Document document, BaseTypeDeclarationSyntax typeDecl, CancellationToken cancellationToken)
         {
             var identifierToken = typeDecl.Identifier;
 
