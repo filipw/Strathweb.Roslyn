@@ -26,7 +26,7 @@ namespace MoveClassToFile
             // also omit all private classes
             var typeDecl = node as BaseTypeDeclarationSyntax;
             if (typeDecl == null ||
-                context.Document.Name.ToLowerInvariant() == string.Format("{0}.cs", typeDecl.Identifier.ToString().ToLowerInvariant()) ||
+                context.Document.Name.ToLowerInvariant() == $"{typeDecl.Identifier.ToString().ToLowerInvariant()}.cs" ||
                 typeDecl.Modifiers.Any(SyntaxKind.PrivateKeyword))
             {
                 return;
@@ -87,8 +87,7 @@ namespace MoveClassToFile
 
             //move to new File
             //TODO: handle name conflicts
-            var newDocument = document.Project.AddDocument(string.Format("{0}.cs", identifierToken.Text), SourceText.From(newFileTree.ToFullString()), document.Folders);
-
+            var newDocument = document.Project.AddDocument($"{identifierToken.Text}.cs", SourceText.From(newFileTree.ToFullString()), document.Folders);
             newDocument = await RemoveUnusedImportDirectivesAsync(newDocument, cancellationToken);
 
             return newDocument.Project.Solution;
@@ -108,7 +107,7 @@ namespace MoveClassToFile
         {
             var oldUsings = root.DescendantNodesAndSelf().Where(s => s is UsingDirectiveSyntax);
             var unusedUsings = GetUnusedImportDirectives(semanticModel, cancellationToken);
-            SyntaxTriviaList leadingTrivia = root.GetLeadingTrivia();
+            var leadingTrivia = root.GetLeadingTrivia();
 
             root = root.RemoveNodes(oldUsings, SyntaxRemoveOptions.KeepNoTrivia);
             var newUsings = SyntaxFactory.List(oldUsings.Except(unusedUsings));
@@ -122,11 +121,11 @@ namespace MoveClassToFile
 
         private static HashSet<SyntaxNode> GetUnusedImportDirectives(SemanticModel model, CancellationToken cancellationToken)
         {
-            HashSet<SyntaxNode> unusedImportDirectives = new HashSet<SyntaxNode>();
-            SyntaxNode root = model.SyntaxTree.GetRoot(cancellationToken);
-            foreach (Diagnostic diagnostic in model.GetDiagnostics(null, cancellationToken).Where(d => d.Id == "CS8019" || d.Id == "CS0105"))
+            var unusedImportDirectives = new HashSet<SyntaxNode>();
+            var root = model.SyntaxTree.GetRoot(cancellationToken);
+            foreach (var diagnostic in model.GetDiagnostics(null, cancellationToken).Where(d => d.Id == "CS8019" || d.Id == "CS0105"))
             {
-                UsingDirectiveSyntax usingDirectiveSyntax = root.FindNode(diagnostic.Location.SourceSpan, false, false) as UsingDirectiveSyntax;
+                var usingDirectiveSyntax = root.FindNode(diagnostic.Location.SourceSpan, false, false) as UsingDirectiveSyntax;
                 if (usingDirectiveSyntax != null)
                 {
                     unusedImportDirectives.Add(usingDirectiveSyntax);
