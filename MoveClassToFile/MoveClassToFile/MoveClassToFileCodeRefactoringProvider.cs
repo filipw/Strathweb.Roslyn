@@ -64,10 +64,26 @@ namespace MoveClassToFile
                 .WithMembers(
                             SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
                                 SyntaxFactory.NamespaceDeclaration(
-                                    SyntaxFactory.IdentifierName(typeSymbol.ContainingNamespace.ToString()))
-                .WithMembers(SyntaxFactory.SingletonList<MemberDeclarationSyntax>(typeDecl))))
+                                    SyntaxFactory.IdentifierName(typeSymbol.ContainingNamespace.ToString()))))
                 .WithoutLeadingTrivia()
                 .NormalizeWhitespace();
+
+            newFileTree = newFileTree
+                .WithMembers(
+                    SyntaxFactory.List<MemberDeclarationSyntax>(
+                        newFileTree
+                            .Members
+                            .Select(
+                                m =>
+                                {
+                                    if (m is NamespaceDeclarationSyntax)
+                                    {
+                                        return ((NamespaceDeclarationSyntax)m).WithMembers(
+                                            SyntaxFactory.SingletonList<MemberDeclarationSyntax>(typeDecl));
+                                    }
+                                    else
+                                        return m;
+                                })));
 
             //move to new File
             //TODO: handle name conflicts
@@ -96,9 +112,9 @@ namespace MoveClassToFile
 
             root = root.RemoveNodes(oldUsings, SyntaxRemoveOptions.KeepNoTrivia);
             var newUsings = SyntaxFactory.List(oldUsings.Except(unusedUsings));
+            
             root = ((CompilationUnitSyntax)root)
                 .WithUsings(newUsings)
-                .NormalizeWhitespace()
                 .WithLeadingTrivia(leadingTrivia);
 
             return root;
