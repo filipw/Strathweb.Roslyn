@@ -81,7 +81,7 @@ namespace MoveClassToFile
             var currentUsings = currentRoot.DescendantNodesAndSelf().Where(s => s is UsingDirectiveSyntax);
 
             var newFileTree = SyntaxFactory.CompilationUnit()
-                .WithUsings(SyntaxFactory.List<UsingDirectiveSyntax>(currentUsings.Select(i => ((UsingDirectiveSyntax)i))))
+                .WithUsings(SyntaxFactory.List<UsingDirectiveSyntax>(currentUsings.Select(i => (UsingDirectiveSyntax)i)))
                 .WithMembers(
                             SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
                                 SyntaxFactory.NamespaceDeclaration(
@@ -102,8 +102,8 @@ namespace MoveClassToFile
                                         return ((NamespaceDeclarationSyntax)m).WithMembers(
                                             SyntaxFactory.SingletonList<MemberDeclarationSyntax>(typeDecl));
                                     }
-                                    else
-                                        return m;
+
+                                    return m;
                                 })));
 
             //move to new File
